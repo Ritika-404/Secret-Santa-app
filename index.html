@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secret Santa Generator (Auto‑Random)</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; padding:40px; }
+    .container { max-width:480px; margin:auto; background:white; padding:25px; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.15); }
+    h2 { text-align:center; margin-bottom:20px; }
+    select, button { width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #ccc; font-size:16px; }
+    button { background:#007bff; color:white; cursor:pointer; }
+    button:hover { background:#005fcc; }
+    #result { margin-top:20px; font-size:20px; font-weight:bold; text-align:center; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Secret Santa Picker </h2>
+
+  <label>Your Name:</label>
+  <select id="userSelect"></select>
+
+  <button onclick="revealRecipient()">Reveal Your Recipient</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+const names = [
+  "Shreeshanth","Dinesh","Raveendra","Kiran","Madhava",
+  "Aravind","Sunil","Mahadev","Prabhu","Ritika",
+  "Lavanya","Arpitha","Deepak"
+];
+
+// Fisher–Yates shuffle for perfect randomization
+function shuffle(array) {
+  let a = array.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Generate valid Secret Santa mapping (no one gets themselves)
+function generateMapping() {
+  let shuffled = shuffle(names);
+  while (shuffled.some((name, idx) => name === names[idx])) {
+    shuffled = shuffle(names);
+  }
+
+  const map = {};
+  names.forEach((giver, idx) => map[giver] = shuffled[idx]);
+  return map;
+}
+
+let mapping = generateMapping(); // fresh mapping at page load
+
+// Populate dropdown
+const userSelect = document.getElementById("userSelect");
+names.forEach(name => {
+  let opt = document.createElement("option");
+  opt.value = name;
+  opt.textContent = name;
+  userSelect.appendChild(opt);
+});
+
+function revealRecipient() {
+  const user = userSelect.value;
+  const recipient = mapping[user];
+  document.getElementById("result").textContent = "You will give a gift to: " + recipient;
+}
+</script>
+</body>
+</html>
