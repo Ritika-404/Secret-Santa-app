@@ -3,25 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Secret Santa Generator (Auto‑Random)</title>
+  <title>Secret Santa Picker </title>
   <style>
-    body { font-family: Arial, sans-serif; background:#f4f4f4; padding:40px; }
-    .container { max-width:480px; margin:auto; background:white; padding:25px; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,0.15); }
-    h2 { text-align:center; margin-bottom:20px; }
-    select, button { width:100%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #ccc; font-size:16px; }
-    button { background:#007bff; color:white; cursor:pointer; }
-    button:hover { background:#005fcc; }
-    #result { margin-top:20px; font-size:20px; font-weight:bold; text-align:center; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: url('https://i.imgur.com/8bP8B3L.jpeg');
+      background-size: cover;
+      background-position: center;
+      padding: 40px;
+      overflow-x: hidden;
+    }
+
+    /* Snow animation */
+    @keyframes snow {
+      0% { transform: translateY(-10px); }
+      100% { transform: translateY(100vh); }
+    }
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 1.2rem;
+      animation: snow linear infinite;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+      border: 2px solid #c40000;
+      backdrop-filter: blur(5px);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 26px;
+      color: #b30000;
+      text-shadow: 1px 1px 0 white;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background: #c40000;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #9b0000;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      color: #008000;
+      text-shadow: 1px 1px 0 white;
+    }
   </style>
 </head>
 <body>
+
+<!-- Snowflakes -->
+<script>
+for (let i = 0; i < 40; i++) {
+  let snow = document.createElement('div');
+  snow.className = 'snowflake';
+  snow.innerHTML = '❄';
+  snow.style.left = Math.random() * 100 + 'vw';
+  snow.style.animationDuration = (Math.random() * 3 + 2) + 's';
+  snow.style.opacity = Math.random();
+  document.body.appendChild(snow);
+}
+</script>
+
 <div class="container">
-  <h2>Secret Santa Picker </h2>
+  <h2>🎅 Secret Santa Picker 🎄</h2>
 
   <label>Your Name:</label>
   <select id="userSelect"></select>
 
-  <button onclick="revealRecipient()">Reveal Your Recipient</button>
+  <button onclick="revealRecipient()" id="revealBtn">Reveal Your Recipient</button>
 
   <div id="result"></div>
 </div>
@@ -33,7 +109,7 @@ const names = [
   "Lavanya","Arpitha","Deepak"
 ];
 
-// Fisher–Yates shuffle for perfect randomization
+// Shuffle function
 function shuffle(array) {
   let a = array.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -43,19 +119,18 @@ function shuffle(array) {
   return a;
 }
 
-// Generate valid Secret Santa mapping (no one gets themselves)
+// Generate valid mapping
 function generateMapping() {
   let shuffled = shuffle(names);
   while (shuffled.some((name, idx) => name === names[idx])) {
     shuffled = shuffle(names);
   }
-
   const map = {};
   names.forEach((giver, idx) => map[giver] = shuffled[idx]);
   return map;
 }
 
-let mapping = generateMapping(); // fresh mapping at page load
+let mapping = generateMapping();
 
 // Populate dropdown
 const userSelect = document.getElementById("userSelect");
@@ -68,8 +143,20 @@ names.forEach(name => {
 
 function revealRecipient() {
   const user = userSelect.value;
+
+  // One-time reveal lock check
+  if (localStorage.getItem("revealed_" + user)) {
+    document.getElementById("result").textContent = " You have already seen your recipient!";
+    document.getElementById("revealBtn").disabled = true;
+    return;
+  }
+
   const recipient = mapping[user];
-  document.getElementById("result").textContent = "You will give a gift to: " + recipient;
+  document.getElementById("result").textContent = "🎁 You will give a gift to: " + recipient;
+
+  // Lock future reveals
+  localStorage.setItem("revealed_" + user, "true");
+  document.getElementById("revealBtn").disabled = true;
 }
 </script>
 </body>
